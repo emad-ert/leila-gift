@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>یک یادگاری ویژه</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #faf6f0;
+            color: #4a3b32;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-image: radial-gradient(#e6dcd2 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .card {
+            background: #fffdf9;
+            max-width: 420px;
+            width: 100%;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(74, 59, 50, 0.08);
+            text-align: center;
+            position: relative;
+            border: 2px dashed #d5c3b3;
+        }
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: #f4ece1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2.5s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+        h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #3d2b24;
+            margin-bottom: 14px;
+        }
+        p {
+            font-size: 0.95rem;
+            line-height: 1.9;
+            color: #6e5a4f;
+            margin-bottom: 24px;
+        }
+        .stitch-line {
+            width: 60%;
+            height: 2px;
+            border-bottom: 2px dashed #c89d7c;
+            margin: 0 auto 20px;
+        }
+        .status {
+            display: inline-block;
+            background: #f4ece1;
+            color: #8c6246;
+            font-size: 0.8rem;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon-box">
+            <!-- آیکون قرقره و نخ و سوزن -->
+            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#8c6246" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+        </div>
+        <h1>در حال کوک زدنِ آخرین کلمات...</h1>
+        <div class="stitch-line"></div>
+        <p>
+            این صفحه‌ی اختصاصی برای همراهی با هدیه‌ی تو طراحی شده است و هم‌زمان با رسیدنِ بسته پستی به دستت، متنِ اصلی آن فعال و باز خواهد شد.
+        </p>
+        <span class="status">وضعیت: در انتظار تحویل بسته</span>
+    </div>
+</body>
+</html>
