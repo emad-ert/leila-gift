@@ -2,96 +2,793 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>یک یادگاری ویژه</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>یک یادگاری برای لیلا</title>
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
     <style>
+        :root {
+            --bg-grad-1: #fdf8f2;
+            --bg-grad-2: #f2e5d5;
+            --card-bg: rgba(255, 253, 250, 0.93);
+            --text-main: #3b2a22;
+            --text-muted: #665146;
+            --accent: #c47d4e;
+            --accent-glow: rgba(196, 125, 78, 0.35);
+            --border-stitch: #d8c2ae;
+            --quote-bg: rgba(196, 125, 78, 0.08);
+            --shadow: 0 20px 50px rgba(65, 45, 35, 0.12);
+        }
+
+        /* تم شبانه مخملی و گرم (نور شمع) - بدون حس سردی یا اضطراب */
+        body.night-theme {
+            --bg-grad-1: #2b1824;
+            --bg-grad-2: #170d16;
+            --card-bg: rgba(42, 25, 38, 0.90);
+            --text-main: #faefe8;
+            --text-muted: #dfcac0;
+            --accent: #e89872;
+            --accent-glow: rgba(232, 152, 114, 0.42);
+            --border-stitch: rgba(232, 152, 114, 0.45);
+            --quote-bg: rgba(232, 152, 114, 0.12);
+            --shadow: 0 25px 65px rgba(0, 0, 0, 0.55);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
+
         body {
-            font-family: 'Vazirmatn', sans-serif;
-            background-color: #faf6f0;
-            color: #4a3b32;
+            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            background: radial-gradient(circle at top, var(--bg-grad-1), var(--bg-grad-2));
+            background-color: var(--bg-grad-2);
+            color: var(--text-main);
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            background-image: radial-gradient(#e6dcd2 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        .card {
-            background: #fffdf9;
-            max-width: 420px;
-            width: 100%;
-            padding: 40px 30px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(74, 59, 50, 0.08);
-            text-align: center;
+            padding: 16px;
+            transition: background 1.8s ease, background-color 1.8s ease, color 1.2s ease;
+            overflow-x: hidden;
             position: relative;
-            border: 2px dashed #d5c3b3;
         }
-        .icon-box {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 24px;
-            background: #f4ece1;
+
+        .fabric-overlay {
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(rgba(150, 120, 95, 0.18) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 0;
+            transition: opacity 1.5s ease;
+        }
+        body.night-theme .fabric-overlay {
+            opacity: 0.22;
+        }
+
+        canvas#ambientCanvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* دکمه شناور موسیقی با اکولایزر */
+        .music-pill {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 100;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1.5px dashed var(--border-stitch);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 50px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            font-size: 0.78rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .music-pill:active {
+            transform: scale(0.94);
+        }
+        .eq-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 2.5px;
+            height: 14px;
+        }
+        .eq-bar {
+            width: 3px;
+            background: var(--accent);
+            border-radius: 2px;
+            animation: eqBounce 0.9s infinite ease-in-out alternate;
+        }
+        .eq-bar:nth-child(1) { height: 6px; animation-delay: 0.1s; }
+        .eq-bar:nth-child(2) { height: 13px; animation-delay: 0.3s; }
+        .eq-bar:nth-child(3) { height: 8px; animation-delay: 0.2s; }
+        .eq-bar:nth-child(4) { height: 11px; animation-delay: 0.4s; }
+        .music-pill.muted .eq-bar {
+            animation: none;
+            height: 3px !important;
+            opacity: 0.4;
+        }
+        @keyframes eqBounce {
+            0% { height: 4px; }
+            100% { height: 14px; }
+        }
+
+        .card-container {
+            position: relative;
+            z-index: 10;
+            max-width: 465px;
+            width: 100%;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 30px 22px 26px;
+            box-shadow: var(--shadow);
+            border: 2px dashed var(--border-stitch);
+            transition: all 1.4s ease;
+        }
+
+        .stitch-progress-wrap {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .stitch-step-label {
+            font-size: 0.75rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .stitch-track {
+            width: 85%;
+            height: 6px;
+            background: rgba(176, 125, 86, 0.14);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stitch-fill {
+            height: 100%;
+            width: 25%;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--accent),
+                var(--accent) 8px,
+                transparent 8px,
+                transparent 12px
+            );
+            transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+            animation: pageReveal 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes pageReveal {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .emblem-badge {
+            width: 68px;
+            height: 68px;
+            margin: 0 auto 16px;
             border-radius: 50%;
+            background: var(--quote-bg);
+            border: 1.5px dashed var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: pulse 2.5s infinite ease-in-out;
+            color: var(--accent);
+            box-shadow: 0 8px 25px var(--accent-glow);
+            animation: floatSlow 3.5s infinite ease-in-out;
         }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.06); }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
         }
-        h1 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #3d2b24;
-            margin-bottom: 14px;
+
+        h1, h2 {
+            font-size: 1.22rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 12px;
+            color: var(--text-main);
+            line-height: 1.65;
         }
-        p {
-            font-size: 0.95rem;
-            line-height: 1.9;
-            color: #6e5a4f;
-            margin-bottom: 24px;
-        }
-        .stitch-line {
-            width: 60%;
-            height: 2px;
-            border-bottom: 2px dashed #c89d7c;
+
+        .stitch-divider {
+            width: 50%;
+            height: 1px;
+            border-bottom: 2px dashed var(--border-stitch);
             margin: 0 auto 20px;
         }
-        .status {
-            display: inline-block;
-            background: #f4ece1;
-            color: #8c6246;
-            font-size: 0.8rem;
-            padding: 6px 16px;
-            border-radius: 50px;
+
+        .letter-text {
+            font-size: 0.94rem;
+            line-height: 2.08;
+            color: var(--text-muted);
+            text-align: justify;
+            margin-bottom: 22px;
+        }
+        .letter-text p {
+            margin-bottom: 14px;
+        }
+        .letter-text strong {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .highlight-quote {
+            padding: 15px 16px;
+            border-right: 3.5px solid var(--accent);
+            background: var(--quote-bg);
+            border-radius: 14px 4px 4px 14px;
+            color: var(--text-main);
+            margin: 18px 0;
+            line-height: 1.98;
+            font-size: 0.93rem;
             font-weight: 500;
+        }
+
+        .pass-box {
+            margin-top: 18px;
+            text-align: center;
+        }
+        .pass-input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 2px solid var(--border-stitch);
+            background: rgba(255, 255, 255, 0.88);
+            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            font-size: 1.02rem;
+            font-weight: 600;
+            text-align: center;
+            color: #3b2a22;
+            outline: none;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .pass-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+            background: #fff;
+        }
+        .shake {
+            animation: shakeAnim 0.4s ease;
+        }
+        @keyframes shakeAnim {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        .pass-hint {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+            display: block;
+            line-height: 1.75;
+            background: var(--quote-bg);
+            padding: 10px 12px;
+            border-radius: 12px;
+        }
+        .error-msg {
+            color: #d94343;
+            font-size: 0.84rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .polaroid-gallery {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 18px 0 22px;
+        }
+        .polaroid {
+            background: #fffdfa;
+            padding: 7px 7px 16px 7px;
+            border-radius: 10px;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+            width: 48%;
+            text-align: center;
+            transform: rotate(-2.5deg);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            border: 1px solid #ede3d8;
+        }
+        .polaroid:nth-child(2) {
+            transform: rotate(2.5deg);
+        }
+        .polaroid:hover, .polaroid:active {
+            transform: rotate(0deg) scale(1.04);
+            z-index: 5;
+        }
+        .polaroid-frame {
+            width: 100%;
+            height: 125px;
+            background: #f3eae0;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #9c806e;
+            font-size: 0.74rem;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        .polaroid-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .polaroid-caption {
+            font-size: 0.74rem;
+            color: #4f3d34;
+            font-weight: 600;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .btn {
+            flex: 1;
+            padding: 14px 18px;
+            border: none;
+            border-radius: 16px;
+            background: var(--accent);
+            color: #fff;
+            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            font-size: 0.94rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 20px var(--accent-glow);
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn-secondary {
+            flex: 0.42;
+            background: transparent;
+            border: 1.5px solid var(--border-stitch);
+            color: var(--text-muted);
+            box-shadow: none;
+            font-weight: 600;
+        }
+
+        .signature-box {
+            margin-top: 22px;
+            padding-top: 16px;
+            border-top: 1.5px dashed var(--border-stitch);
+            text-align: center;
+        }
+        .signature-wish {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .signature-name {
+            display: inline-block;
+            font-weight: 800;
+            color: var(--accent);
+            font-size: 1.1rem;
         }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="icon-box">
-            <!-- آیکون قرقره و نخ و سوزن -->
-            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#8c6246" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
+
+    <div class="fabric-overlay"></div>
+    <canvas id="ambientCanvas"></canvas>
+
+    <button class="music-pill" id="musicBtn" type="button">
+        <div class="eq-bars">
+            <span class="eq-bar"></span>
+            <span class="eq-bar"></span>
+            <span class="eq-bar"></span>
+            <span class="eq-bar"></span>
         </div>
-        <h1>در حال کوک زدنِ آخرین کلمات...</h1>
-        <div class="stitch-line"></div>
-        <p>
-            این صفحه‌ی اختصاصی برای همراهی با هدیه‌ی تو طراحی شده است و هم‌زمان با رسیدنِ بسته پستی به دستت، متنِ اصلی آن فعال و باز خواهد شد.
-        </p>
-        <span class="status">وضعیت: در انتظار تحویل بسته</span>
+        <span id="musicLabel">موسیقی روشن</span>
+    </button>
+
+    <audio id="audio1" src="music1.mp3" loop preload="auto"></audio>
+    <audio id="audio2" src="music2.mp3" loop preload="auto"></audio>
+
+    <div class="card-container">
+        <div class="stitch-progress-wrap" id="progressWrap">
+            <span class="stitch-step-label" id="stepLabel">کوک اول از چهار</span>
+            <div class="stitch-track">
+                <div class="stitch-fill" id="stitchFill"></div>
+            </div>
+        </div>
+
+        <!-- صفحه ۰: رمز ورود -->
+        <div class="step active" id="step-0">
+            <div class="emblem-badge">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="13" r="8"/>
+                    <path d="M12 5C12 3 14 2 16 2C16 4 14 5 12 5Z"/>
+                    <circle cx="9.5" cy="11.5" r="0.8" fill="currentColor"/>
+                    <circle cx="14.5" cy="11.5" r="0.8" fill="currentColor"/>
+                    <circle cx="9.5" cy="15.5" r="0.8" fill="currentColor"/>
+                    <circle cx="14.5" cy="15.5" r="0.8" fill="currentColor"/>
+                    <path d="M9.5 11.5l5 4M14.5 11.5l-5 4"/>
+                </svg>
+            </div>
+            <h1>برای لیلا؛<br>یه یادگاری و چند خط حرفِ دل</h1>
+            <div class="stitch-divider"></div>
+            <p class="letter-text" style="text-align: center; margin-bottom: 14px;">
+                خوشحالم که بسته بالاخره به دستت رسید. قبل از اینکه قفلِ این نامه رو باز کنی، صدای گوشیت رو زیاد کن و چند دقیقه توی خلوتِ خودت ورقش بزن.
+            </p>
+            <div class="pass-box">
+                <input type="text" id="passInput" class="pass-input" placeholder="رمز ورود رو اینجا بنویس..." autocomplete="off">
+                <span class="pass-hint">
+                    🍊 <strong>راهنمای رمز:</strong> میوه‌ای که همیشه بهت می‌گفتم شبیهشی؛ همون‌قدر ترش و شیرین و دوست‌داشتنی...
+                </span>
+                <div class="error-msg" id="errorMsg">رمزش همون میوه‌ی ترش و شیرینِ مورد علاقه‌ته (نارنگی)...</div>
+                <button class="btn" id="unlockBtn" type="button">باز کردن نامه (پخش با صدا 🎵)</button>
+            </div>
+        </div>
+
+        <!-- صفحه ۱: داستان دیوارکوب و خیاطی -->
+        <div class="step" id="step-1">
+            <h2>پرده اول: داستانِ این دیوارکوب</h2>
+            <div class="stitch-divider"></div>
+            <div class="letter-text">
+                <p>
+                    وقتی داشتم به این فکر می‌کردم چه یادگاری‌ای برات بگیرم که واقعاً شبیه خودت و روحیه‌ت باشه، ذهنم سمتِ چیزای مختلفی رفت. تکواندو؟ کاراته؟ نقاشی؟ نه... ذهنم رفت سمتِ قشنگ‌ترین هنری که توی دست‌هاته: <strong>خیاطی</strong>.
+                </p>
+                <p>
+                    خیاطی از نگاه من فقط دوختنِ لباس و تحویل دادنِ سفارش نیست؛ هنرِ کنار هم گذاشتنِ تکه‌های بی‌روح و بی‌قواره‌ی جدا از هم، حوصله به خرج دادن با ظرافت، و ساختنِ یه اثرِ قشنگ از دلِ پارچه‌های ساده‌ست. کسی که خیاطی بلده، ارزشِ کوک‌های ساده و بی‌حاشیه رو خوب می‌دونه.
+                </p>
+                <p>
+                    طرحِ این دخترِ خیاط رو برای اتاقِ خیاطیت با اون ویوی ابدی انتخاب کردم، چون تلاش و هنرت همیشه برام تحسین‌برانگیز بود. البته دخترِ توی نقاشی یه چندتا کبودی ازت کمتر داره و به خوشگلیِ خودت هم نیست! امیدوارم هر وقت چشمت بهش می‌افته، یادت بیاد چقدر هنر و زیبایی توی وجودت داری. دستای زندگی‌بخشی داری لیلایی.
+                </p>
+            </div>
+            <div class="btn-row">
+                <button class="btn" type="button" onclick="goToStep(2)">ورق بزن به صفحه بعد ←</button>
+            </div>
+        </div>
+
+        <!-- صفحه ۲: خاطرات خوابگاه میبد، سیم‌تلفنی‌ها و شیشه نسکافه -->
+        <div class="step" id="step-2">
+            <h2>پرده دوم: از خوابگاه میبد تا شیشه نسکافه...</h2>
+            <div class="stitch-divider"></div>
+            <div class="letter-text">
+                <p>
+                    وقتی به عقب نگاه می‌کنم، باورم نمی‌شه چطور یه تماس تصویریِ ساده توی خوابگاه میبد با زری، تبدیل شد به چهار پنج سال هم‌صحبتی و رفاقت. هنوز اولین باری که دیدمت یادمه؛ روی تخت، با یه زبونِ دراز سعی می‌کردی سرِ صحبت رو باز کنی و راستش رو بخوای، از همون موقع ازت خیلی خوشم اومد! از شوخی و خنده‌های تماس تصویریِ گروهِ چهار نفره‌مون گرفته تا ساعت‌ها حرف زدن، بدونِ اینکه بفهمیم چقدر هوا سرده یا زمان چطوری گذشت.
+                </p>
+
+                <!-- اگر عکس گذاشتی خودکار نمایش می‌دهد، وگرنه کادر را مخفی می‌کند تا صفحه تمیز بماند -->
+                <div class="polaroid-gallery" id="galleryBox">
+                    <div class="polaroid" id="pol1">
+                        <div class="polaroid-frame">
+                            <img src="photo1.jpg" alt="خاطره ۱" onload="document.getElementById('galleryBox').style.display='flex';" onerror="document.getElementById('pol1').style.display='none';">
+                        </div>
+                        <div class="polaroid-caption">یادگاری روزهای خوب</div>
+                    </div>
+                    <div class="polaroid" id="pol2">
+                        <div class="polaroid-frame">
+                            <img src="photo2.jpg" alt="خاطره ۲" onload="document.getElementById('galleryBox').style.display='flex';" onerror="document.getElementById('pol2').style.display='none';">
+                        </div>
+                        <div class="polaroid-caption">یه قاب موندگار</div>
+                    </div>
+                </div>
+
+                <p>
+                    و اوجش! اون یک باری که همو توی <strong>میبد</strong> دیدیم؛ اون‌همه با ذوق و سلیقه آماده شده بودی! سیم‌تلفنی‌ها! هنوز بوی هوای اونجا یادمه... شکلات‌های کاکائوییِ آب‌شده توی کیفم، و اون <strong>شیشه نسکافه</strong> که به عنوان اولین یادگاری بهت دادم و تا مدت‌ها نگهش داشته بودی. همه‌ی این لحظه‌ها و شب‌هایی که از دلتنگی و اتفاقاتِ روزمره به هم گفتیم، برام واقعی و باارزش بودن.
+                </p>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" type="button" onclick="goToStep(1)">→ قبلی</button>
+                <button class="btn" type="button" onclick="goToStep(3)">ورق بزن به صفحه بعد ←</button>
+            </div>
+        </div>
+
+        <!-- صفحه ۳: اعتراف حس واقعی و مرزبندی (تم شب مخملی گرم + آهنگ دوم) -->
+        <div class="step" id="step-3">
+            <h2>پرده سوم: حرفِ دلی که نباید ناگفته بمونه</h2>
+            <div class="stitch-divider"></div>
+            <div class="letter-text">
+                <p>
+                    تو من رو می‌شناسی؛ نمی‌گم خیلی زیاد، ولی به اندازه‌ی کافی چرا. مثل همیشه می‌خوام باهات روراست و صادق باشم و بدونِ هیچ نقابی حرفِ دلم رو بزنم. خودت بهتر از هر کسی می‌دونی حسِ من به تو توی این سال‌ها، یه دوستیِ ساده و معمولی نبود.
+                </p>
+                <div class="highlight-quote">
+                    «جنسِ علاقه‌ی من به تو، همون حالِ خوبی بود که با شنیدنِ صدات و دیدنِ خنده‌هات می‌گرفتم. یه دوست داشتنِ عمیق و خالص که نه از سرِ عادت و هوس بود و نه برای پر کردنِ وقت؛ بلکه از خواستنِ خودِ خودِ خودِ واقعیت بود، با همه‌ی خوبی‌ها و شیطنت‌هات.»
+                </div>
+                <p>
+                    اما دقیقاً به خاطرِ اینکه این حس توی قلبِ من این‌قدر واقعی و ویژه بود، ادامه دادنِ این مسیر در نقشِ یه «دوستِ معمولی» کارِ درستی نیست. موندن توی این حالت، هم به دل و آرامشِ خودم فشار میاره و هم باعث می‌شه تو بی‌دلیل عذاب وجدان داشته باشی؛ و من هیچ‌کدوم از اینا رو برای «ما» نمی‌خوام.
+                </p>
+                <p>
+                    ما با هم بد نبودیم؛ ما فوق‌العاده بودیم و از هم هیچ کینه یا دلخوری‌ای نداریم. اما خب گاهی پیش میاد دیگه... گاهی دو نفر که همو دوست دارن، مسیرِ زندگی و خواسته‌هاشون با هم یکی نیست.
+                </p>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" type="button" onclick="goToStep(2)">→ قبلی</button>
+                <button class="btn" type="button" onclick="goToStep(4)">آخرین برگِ نامه ←</button>
+            </div>
+        </div>
+
+        <!-- صفحه ۴: خداحافظی احساسی و باوقار -->
+        <div class="step" id="step-4">
+            <h2>پرده آخر: آخرین کوکِ این فصل</h2>
+            <div class="stitch-divider"></div>
+            <div class="letter-text">
+                <p>
+                    این دیوارکوب و این چند خط رو برات فرستادم، چون دلم نمی‌خواست این فصلِ چند ساله‌ی قشنگمون با سردی یا دلخوری بسته بشه؛ خواستم توی اوجِ احترام و دوست داشتن و با یه یادگاریِ قشنگ برای هم دست تکون بدیم.
+                </p>
+                <p>
+                    واقعاً این هفته‌ای که گذشت، با اینکه تو روحِت هم خبر نداشت توی دلم چه تصمیمی گرفتم، سعی کردم از لحظه‌به‌لحظه‌ی حرف زدنامون لذت ببرم و یکی از بهترین تایم‌های زندگیم رو باهات بگذرونم. هیچ‌کدوم از ما نمی‌تونیم خاطراتِ خوبِ این سال‌ها رو از ذهنمون پاک کنیم، و نیازی هم نیست این کار رو بکنیم. من با قلبی آروم، پر از عشقِ واقعی و احترام، یه قدم به عقب می‌رم و امیدوارم این تصمیم به آرامشِ هر دومون کمک کنه.
+                </p>
+                <p>
+                    از تهِ دلم از خدا می‌خوام همیشه صدای خنده‌هات بلند باشه، توی هنر و رویاهات بدرخشی و به اون آرامش و خوشبختیِ واقعی که لیاقتش رو داری برسی. خیلی مراقبِ خودت و قلبِ مهربونت باش.
+                </p>
+                <div class="signature-box">
+                    <span class="signature-wish">همیشه برات بهترین‌ها رو می‌خوام و محاله فراموشت کنم.</span>
+                    <span class="signature-name">عماد 🍊</span>
+                </div>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" type="button" onclick="goToStep(3)">→ مرور صفحه قبل</button>
+            </div>
+        </div>
     </div>
+
+    <script>
+        // ==========================================
+        // لینک کلادفلر ورکرت رو دقیقاً بین دو گیومه زیر قرار بده:
+        // ==========================================
+        const WORKER_URL = "https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev";
+
+        // رمزهای مجاز (نارنگی + نسکافه + سلام)
+        const PASS_NARANGI = "\u0646\u0627\u0631\u0646\u06af\u06cc";
+        const PASS_NARANGI_AR = "\u0646\u0627\u0631\u0646\u06af\u064a";
+        const PASS_NESCAFE = "\u0646\u0633\u06a9\u0627\u0641\u0647";
+        const PASS_SALAM = "\u0633\u0644\u0627\u0645";
+
+        let currentStep = 0;
+        let stepStartTime = Date.now();
+        let isMuted = false;
+        let currentTrack = 0;
+        let audioFadeTimer = null;
+
+        const audio1 = document.getElementById('audio1');
+        const audio2 = document.getElementById('audio2');
+
+        audio1.addEventListener('error', function() {
+            if (!audio1.src.endsWith('.mp3.mp3')) audio1.src = 'music1.mp3.mp3';
+        });
+        audio2.addEventListener('error', function() {
+            if (!audio2.src.endsWith('.mp3.mp3')) audio2.src = 'music2.mp3.mp3';
+        });
+
+        function sendNotify(eventName) {
+            try {
+                if (!WORKER_URL || WORKER_URL.includes("YOUR-WORKER-NAME")) return;
+                const spentSeconds = Math.round((Date.now() - stepStartTime) / 1000);
+                fetch(WORKER_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        event: eventName,
+                        duration: spentSeconds + " ثانیه",
+                        device: navigator.userAgent.slice(0, 70)
+                    })
+                }).catch(function() {});
+            } catch (e) {}
+        }
+
+        function switchAudioTrack(targetTrack) {
+            if (currentTrack === targetTrack) return;
+            currentTrack = targetTrack;
+
+            if (audioFadeTimer) {
+                clearInterval(audioFadeTimer);
+                audioFadeTimer = null;
+            }
+
+            const incoming = (targetTrack === 1) ? audio1 : audio2;
+            const outgoing = (targetTrack === 1) ? audio2 : audio1;
+
+            incoming.muted = isMuted;
+            outgoing.muted = isMuted;
+
+            incoming.volume = 0;
+            const playPromise = incoming.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(function() {});
+            }
+
+            let tick = 0;
+            const totalTicks = 20;
+            const startOutVol = outgoing.paused ? 0 : (outgoing.volume || 0.85);
+
+            audioFadeTimer = setInterval(function() {
+                tick++;
+                const progress = tick / totalTicks;
+
+                incoming.volume = Math.min(0.85, 0.85 * progress);
+                if (!outgoing.paused) {
+                    outgoing.volume = Math.max(0, startOutVol * (1 - progress));
+                }
+
+                if (tick >= totalTicks) {
+                    clearInterval(audioFadeTimer);
+                    audioFadeTimer = null;
+                    outgoing.pause();
+                    outgoing.volume = 0;
+                    incoming.volume = 0.85;
+                }
+            }, 70);
+        }
+
+        function unlockLetter() {
+            const inputEl = document.getElementById('passInput');
+            const rawVal = inputEl.value || "";
+            const cleanVal = rawVal.trim().replace(/\s+/g, '');
+
+            const isValid = (
+                cleanVal.includes(PASS_NARANGI) ||
+                cleanVal.includes(PASS_NARANGI_AR) ||
+                cleanVal.includes(PASS_NESCAFE) ||
+                cleanVal.includes(PASS_SALAM) ||
+                cleanVal.toLowerCase() === "narangi"
+            );
+
+            if (isValid) {
+                document.getElementById('errorMsg').style.display = 'none';
+                document.getElementById('progressWrap').style.display = 'flex';
+                document.getElementById('musicBtn').style.display = 'flex';
+
+                audio2.volume = 0;
+                audio2.play().then(function() {
+                    audio2.pause();
+                    audio2.currentTime = 0;
+                }).catch(function() {});
+
+                switchAudioTrack(1);
+
+                sendNotify("🔓 رمز درست وارد شد (" + rawVal + ") - شروع پرده ۱");
+                stepStartTime = Date.now();
+                showStepDOM(1);
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
+                inputEl.classList.remove('shake');
+                void inputEl.offsetWidth;
+                inputEl.classList.add('shake');
+                sendNotify("❌ رمز اشتباه زده شد: " + rawVal);
+            }
+        }
+
+        function goToStep(stepNum) {
+            sendNotify("📖 ورق زد به پرده " + stepNum + (stepNum === 4 ? " (صفحه آخر نامه 🏁)" : ""));
+            stepStartTime = Date.now();
+            showStepDOM(stepNum);
+
+            if (stepNum >= 3) {
+                document.body.classList.add('night-theme');
+                switchAudioTrack(2);
+            } else {
+                document.body.classList.remove('night-theme');
+                switchAudioTrack(1);
+            }
+        }
+
+        function showStepDOM(stepNum) {
+            currentStep = stepNum;
+            document.querySelectorAll('.step').forEach(function(el) {
+                el.classList.remove('active');
+            });
+            document.getElementById('step-' + stepNum).classList.add('active');
+
+            const labels = ["کوک اول از چهار", "کوک دوم از چهار", "کوک سوم از چهار", "آخرین کوک"];
+            document.getElementById('stepLabel').textContent = labels[stepNum - 1] || "";
+            document.getElementById('stitchFill').style.width = (stepNum * 25) + "%";
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            audio1.muted = isMuted;
+            audio2.muted = isMuted;
+            const btn = document.getElementById('musicBtn');
+            const label = document.getElementById('musicLabel');
+            btn.classList.toggle('muted', isMuted);
+            label.textContent = isMuted ? 'موسیقی خاموش' : 'موسیقی روشن';
+        }
+
+        document.getElementById('unlockBtn').addEventListener('click', unlockLetter);
+        document.getElementById('musicBtn').addEventListener('click', toggleMute);
+        document.getElementById('passInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') unlockLetter();
+        });
+
+        function initAmbientCanvas() {
+            const canvas = document.getElementById('ambientCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let w = canvas.width = window.innerWidth;
+            let h = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', function() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            });
+
+            const particles = Array.from({ length: 34 }, function() {
+                return {
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    r: Math.random() * 2.4 + 0.8,
+                    dx: (Math.random() - 0.5) * 0.35,
+                    dy: -Math.random() * 0.45 - 0.15,
+                    alpha: Math.random() * 0.65 + 0.2
+                };
+            });
+
+            function draw() {
+                ctx.clearRect(0, 0, w, h);
+                const isNight = document.body.classList.contains('night-theme');
+                particles.forEach(function(p) {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    if (isNight) {
+                        ctx.fillStyle = "rgba(240, 175, 135, " + p.alpha + ")";
+                        ctx.shadowBlur = 12;
+                        ctx.shadowColor = "rgba(240, 175, 135, 0.85)";
+                    } else {
+                        ctx.fillStyle = "rgba(196, 125, 78, " + (p.alpha * 0.55) + ")";
+                        ctx.shadowBlur = 4;
+                        ctx.shadowColor = "rgba(196, 125, 78, 0.3)";
+                    }
+                    ctx.fill();
+
+                    p.x += p.dx;
+                    p.y += p.dy;
+                    if (p.y < -10) p.y = h + 10;
+                    if (p.x < -10) p.x = w + 10;
+                    if (p.x > w + 10) p.x = -10;
+                });
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            sendNotify("👀 کیوآرکد اسکن شد (صفحه رمز باز شد)");
+            initAmbientCanvas();
+        });
+    </script>
 </body>
 </html>
