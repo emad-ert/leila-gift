@@ -19,7 +19,6 @@
             --shadow: 0 20px 50px rgba(65, 45, 35, 0.12);
         }
 
-        /* تم شبانه مخملی و گرم (نور شمع) - بدون حس سردی یا اضطراب */
         body.night-theme {
             --bg-grad-1: #2b1824;
             --bg-grad-2: #170d16;
@@ -76,7 +75,6 @@
             z-index: 1;
         }
 
-        /* دکمه شناور موسیقی با اکولایزر */
         .music-pill {
             position: fixed;
             top: 16px;
@@ -304,54 +302,92 @@
             display: none;
         }
 
+        /* گالری پولاروید اصلاح‌شده (بدون برش و کراپ عکس‌های عمودی) */
         .polaroid-gallery {
-            display: flex;
-            gap: 12px;
+            display: none;
+            gap: 14px;
             justify-content: center;
-            margin: 18px 0 22px;
+            align-items: flex-start;
+            margin: 20px 0 24px;
+            flex-wrap: wrap;
         }
         .polaroid {
             background: #fffdfa;
-            padding: 7px 7px 16px 7px;
-            border-radius: 10px;
-            box-shadow: 0 10px 24px rgba(0,0,0,0.12);
-            width: 48%;
+            padding: 8px 8px 14px 8px;
+            border-radius: 12px;
+            box-shadow: 0 10px 26px rgba(0,0,0,0.14);
+            width: 47%;
+            max-width: 195px;
             text-align: center;
-            transform: rotate(-2.5deg);
+            transform: rotate(-2deg);
             transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
             border: 1px solid #ede3d8;
+            cursor: zoom-in;
         }
         .polaroid:nth-child(2) {
-            transform: rotate(2.5deg);
+            transform: rotate(2deg);
         }
         .polaroid:hover, .polaroid:active {
-            transform: rotate(0deg) scale(1.04);
+            transform: rotate(0deg) scale(1.03);
             z-index: 5;
         }
         .polaroid-frame {
             width: 100%;
-            height: 125px;
+            height: auto;
             background: #f3eae0;
-            border-radius: 6px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #9c806e;
-            font-size: 0.74rem;
+            border-radius: 8px;
             margin-bottom: 8px;
             overflow: hidden;
         }
         .polaroid-frame img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: auto;
+            max-height: 270px;
+            object-fit: contain;
             display: block;
+            margin: 0 auto;
+            border-radius: 6px;
         }
         .polaroid-caption {
             font-size: 0.74rem;
             color: #4f3d34;
             font-weight: 600;
+        }
+        .zoom-hint {
+            font-size: 0.65rem;
+            color: #9c806e;
+            margin-top: 2px;
+            display: block;
+        }
+
+        /* پنجره بزرگ‌نمایی عکس (Lightbox) */
+        .lightbox-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 10, 18, 0.92);
+            backdrop-filter: blur(8px);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            cursor: zoom-out;
+            animation: fadeIn 0.25s ease;
+        }
+        .lightbox-modal.open {
+            display: flex;
+        }
+        .lightbox-modal img {
+            max-width: 94%;
+            max-height: 88vh;
+            border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            border: 3px solid #fffdfa;
+            object-fit: contain;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .btn-row {
@@ -410,6 +446,11 @@
 
     <div class="fabric-overlay"></div>
     <canvas id="ambientCanvas"></canvas>
+
+    <!-- پنجره تمام‌صفحه برای بزرگ‌نمایی عکس‌ها با لمس -->
+    <div class="lightbox-modal" id="lightboxModal" onclick="closeLightbox()">
+        <img id="lightboxImg" src="" alt="بزرگ‌نمایی خاطره">
+    </div>
 
     <button class="music-pill" id="musicBtn" type="button">
         <div class="eq-bars">
@@ -489,19 +530,21 @@
                     وقتی به عقب نگاه می‌کنم، باورم نمی‌شه چطور یه تماس تصویریِ ساده توی خوابگاه میبد با زری، تبدیل شد به چهار پنج سال هم‌صحبتی و رفاقت. هنوز اولین باری که دیدمت یادمه؛ روی تخت، با یه زبونِ دراز سعی می‌کردی سرِ صحبت رو باز کنی و راستش رو بخوای، از همون موقع ازت خیلی خوشم اومد! از شوخی و خنده‌های تماس تصویریِ گروهِ چهار نفره‌مون گرفته تا ساعت‌ها حرف زدن، بدونِ اینکه بفهمیم چقدر هوا سرده یا زمان چطوری گذشت.
                 </p>
 
-                <!-- اگر عکس گذاشتی خودکار نمایش می‌دهد، وگرنه کادر را مخفی می‌کند تا صفحه تمیز بماند -->
+                <!-- گالری پولاروید بدون کراپ + قابلیت بزرگ‌نمایی با لمس -->
                 <div class="polaroid-gallery" id="galleryBox">
-                    <div class="polaroid" id="pol1">
+                    <div class="polaroid" id="pol1" onclick="openLightbox('photo1.jpg')">
                         <div class="polaroid-frame">
                             <img src="photo1.jpg" alt="خاطره ۱" onload="document.getElementById('galleryBox').style.display='flex';" onerror="document.getElementById('pol1').style.display='none';">
                         </div>
-                        <div class="polaroid-caption">یادگاری روزهای خوب</div>
+                        <div class="polaroid-caption">جمع چهار نفره‌مون</div>
+                        <span class="zoom-hint">(برای بزرگ‌نمایی لمس کن)</span>
                     </div>
-                    <div class="polaroid" id="pol2">
+                    <div class="polaroid" id="pol2" onclick="openLightbox('photo2.jpg')">
                         <div class="polaroid-frame">
                             <img src="photo2.jpg" alt="خاطره ۲" onload="document.getElementById('galleryBox').style.display='flex';" onerror="document.getElementById('pol2').style.display='none';">
                         </div>
                         <div class="polaroid-caption">یه قاب موندگار</div>
+                        <span class="zoom-hint">(برای بزرگ‌نمایی لمس کن)</span>
                     </div>
                 </div>
 
@@ -568,7 +611,7 @@
         // ==========================================
         // لینک کلادفلر ورکرت رو دقیقاً بین دو گیومه زیر قرار بده:
         // ==========================================
-        const WORKER_URL = "https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev";
+        const WORKER_URL = "https://leila-letter-notify.emad-ert-laptop.workers.dev";
 
         // رمزهای مجاز (نارنگی + نسکافه + سلام)
         const PASS_NARANGI = "\u0646\u0627\u0631\u0646\u06af\u06cc";
@@ -591,6 +634,17 @@
         audio2.addEventListener('error', function() {
             if (!audio2.src.endsWith('.mp3.mp3')) audio2.src = 'music2.mp3.mp3';
         });
+
+        function openLightbox(imgSrc) {
+            const modal = document.getElementById('lightboxModal');
+            const img = document.getElementById('lightboxImg');
+            img.src = imgSrc;
+            modal.classList.add('open');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightboxModal').classList.remove('open');
+        }
 
         function sendNotify(eventName) {
             try {
